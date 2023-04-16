@@ -8,6 +8,7 @@ import {
   Delete,
   ParseUUIDPipe,
   BadRequestException,
+  NotFoundException,
 } from '@nestjs/common';
 import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { ArticlesService } from './articles.service';
@@ -16,7 +17,7 @@ import { UpdateArticleDto } from './dto/update-article.dto';
 import { ArticleEntity } from './entities/article.entity';
 
 const parseIDPipe = new ParseUUIDPipe({
-  exceptionFactory(errors) {
+  exceptionFactory(_) {
     return new BadRequestException('id must be a uuid');
   },
 });
@@ -48,8 +49,11 @@ export class ArticlesController {
 
   @Get(':id')
   @ApiOkResponse({ type: ArticleEntity })
-  findOne(@Param('id', parseIDPipe) id: string) {
-    return this.articlesService.findOne(id);
+  async findOne(@Param('id', parseIDPipe) id: string) {
+    const article = await this.articlesService.findOne(id);
+    if (!article) {
+      throw new NotFoundException(`Article with ${id} does not exist`);
+    }
   }
 
   @Patch(':id')
