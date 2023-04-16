@@ -15,12 +15,7 @@ import { ArticlesService } from './articles.service';
 import { CreateArticleDto } from './dto/create-article.dto';
 import { UpdateArticleDto } from './dto/update-article.dto';
 import { ArticleEntity } from './entities/article.entity';
-
-const parseIDPipe = new ParseUUIDPipe({
-  exceptionFactory(_) {
-    return new BadRequestException('id must be a uuid');
-  },
-});
+import { ParseIDPipe } from 'src/utils/custom_pipes';
 
 @Controller('articles')
 @ApiTags('articles')
@@ -49,7 +44,7 @@ export class ArticlesController {
 
   @Get(':id')
   @ApiOkResponse({ type: ArticleEntity })
-  async findOne(@Param('id', parseIDPipe) id: string) {
+  async findOne(@Param('id', ParseIDPipe) id: string) {
     const article = await this.articlesService.findOne(id);
     if (!article) {
       throw new NotFoundException(`Article with ${id} does not exist`);
@@ -59,7 +54,7 @@ export class ArticlesController {
   @Patch(':id')
   @ApiOkResponse({ type: ArticleEntity })
   update(
-    @Param('id', parseIDPipe) id: string,
+    @Param('id', ParseIDPipe) id: string,
     @Body() updateArticleDto: UpdateArticleDto,
   ) {
     return this.articlesService.update(id, updateArticleDto);
@@ -67,7 +62,7 @@ export class ArticlesController {
 
   @Delete(':id')
   @ApiOkResponse({ type: ArticleEntity })
-  remove(@Param('id', parseIDPipe) id: string) {
+  remove(@Param('id', ParseIDPipe) id: string) {
     return this.articlesService.remove(id);
   }
 }
